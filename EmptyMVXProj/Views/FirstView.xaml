@@ -1,0 +1,155 @@
+<views:MvxWpfView 
+             x:Class="EmptyMVXProj.Views.FirstView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:views="clr-namespace:MvvmCross.Wpf.Views;assembly=MvvmCross.Wpf"
+             xmlns:controls="clr-namespace:VisionHealth.Component.UICommon;assembly=VisionHealth.Component.UICommon"
+             xmlns:LocalControls="clr-namespace:EmptyMVXProj.Controls"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    
+    <views:MvxWpfView.Resources>
+        <ResourceDictionary>
+            <!-- my styles -->
+            <HierarchicalDataTemplate x:Key="TopLevelParentTemplate" ItemsSource="{Binding Children}">
+                <TextBlock x:Name="DisplayText" Style="{StaticResource Baseline}"  Margin="4,4,0,4" VerticalAlignment="Center" Foreground="Black">
+                    <Run Text="{Binding Description}"/>
+                </TextBlock>
+                <HierarchicalDataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding NavigationOnly}" Value="True">
+                        <Setter TargetName="DisplayText" Property="Foreground" Value="{StaticResource Grey-Brush-5000}"/>
+                    </DataTrigger>
+                </HierarchicalDataTemplate.Triggers>
+            </HierarchicalDataTemplate>
+
+            <!-- defualt styles from MSDN-->
+            <Style x:Key="ExpandCollapseToggleStyle" TargetType="ToggleButton">
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Grid>
+                                <controls:ColourableControl x:Name="Collapsed" Template="{StaticResource MedkitChevronRightVector}" PrimaryColour="{StaticResource BrightBlue-4000}"  Height="14" Width="14" HorizontalAlignment="Left" Visibility="Visible"/>
+                                <controls:ColourableControl x:Name="Expanded" Template="{StaticResource MedkitChevronDownVector}" PrimaryColour="{StaticResource BrightBlue-4000}" Height="14" Width="14" HorizontalAlignment="Left" Visibility="Collapsed"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Collapsed" Property="Visibility" Value="Collapsed"/>
+                                    <Setter TargetName="Expanded" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter TargetName="Collapsed" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="Expanded" Property="Visibility" Value="Collapsed"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <Style x:Key="TreeViewItemBorderStyle" TargetType="Border">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=LocalControls:MedKitTreeViewItem}, Path=IsSelected}" Value="False"/>
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="{StaticResource PastelBlue-Brush-8000}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource PastelBlue-Brush-8000}"/>
+                    </MultiDataTrigger>
+                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=LocalControls:MedKitTreeViewItem}, Path=IsSelected}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource PastelBlue-Brush-7000}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource PastelBlue-Brush-7000}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="{x:Type LocalControls:MedKitTreeViewItem}" TargetType="{x:Type LocalControls:MedKitTreeViewItem}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="HorizontalContentAlignment" Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+                <Setter Property="VerticalContentAlignment" Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+                <Setter Property="Padding" Value="1,0,0,0" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition MinWidth="24" Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="ExpansionStates">
+                                        <VisualState x:Name="Expanded">
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ItemsHost">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Collapsed" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <ToggleButton x:Name="Expander" Style="{StaticResource ExpandCollapseToggleStyle}" ClickMode="Press" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Border x:Name="Bd" Grid.Column="1" Padding="{TemplateBinding Padding}" Style="{StaticResource TreeViewItemBorderStyle}">
+                                    <ContentPresenter x:Name="PART_Header" ContentSource="Header" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                </Border>
+                                <ItemsPresenter x:Name="ItemsHost" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Visibility="Collapsed" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="HasItems" Value="false">
+                                    <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="HasHeader" Value="false" />
+                                        <Condition Property="Width" Value="Auto" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="PART_Header" Property="MinWidth" Value="75" />
+                                </MultiTrigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="HasHeader" Value="false" />
+                                        <Condition Property="Height" Value="Auto" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="PART_Header" Property="MinHeight" Value="19" />
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="LocalControls:MedKitTreeView">
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="ItemTemplate" Value="{StaticResource TopLevelParentTemplate}"/>
+            </Style>
+        </ResourceDictionary>
+    </views:MvxWpfView.Resources>
+    
+
+    <Grid>
+        <StackPanel>
+            <Button x:Name="CollapseAll" Content="Collapse all" Width="200" Height="30" Margin="5,10,2,25" Click="CollapseAll_Click"/>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" BorderThickness="2" BorderBrush="Red">
+                <LocalControls:MedKitTreeView x:Name="TreeView" ItemsSource="{Binding HirarchicalTreeList}" Margin="5">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="ItemExpandedEvent">
+                            <i:InvokeCommandAction Command="{Binding ItemExpandedEvent}" CommandParameter="{Binding ElementName=TreeView, Path=ExpandingMember, Mode=TwoWay}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </LocalControls:MedKitTreeView>
+            </ScrollViewer>
+        </StackPanel>
+    </Grid>
+</views:MvxWpfView>
